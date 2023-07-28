@@ -47,7 +47,7 @@ func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) RunApp() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.mainHandler)
-	http.ListenAndServe(`:8082`, mux)
+	http.ListenAndServe(`:8080`, mux)
 }
 
 func GetNewServer() *Server {

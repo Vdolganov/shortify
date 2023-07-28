@@ -26,7 +26,7 @@ func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 	responseData, err := ioutil.ReadAll(r.Body)
 	if err != nil || len(responseData) == 0 {
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	responseString := string(responseData)

@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/Vdolganov/shortify/internal/app/shorter"
@@ -14,7 +14,7 @@ type Server struct {
 }
 
 func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
-	result, exist := s.shorter.GetFullUrl(r.URL.Path[1:])
+	result, exist := s.shorter.GetFullURL(r.URL.Path[1:])
 	if exist {
 		w.Header().Add("Location", result)
 		w.WriteHeader(http.StatusTemporaryRedirect)
@@ -24,7 +24,7 @@ func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
-	responseData, err := ioutil.ReadAll(r.Body)
+	responseData, err := io.ReadAll(r.Body)
 	if err != nil || len(responseData) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -47,7 +47,7 @@ func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) RunApp() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.mainHandler)
-	http.ListenAndServe(`:8080`, mux)
+	http.ListenAndServe(`localhost:8080`, mux)
 }
 
 func GetNewServer() *Server {

@@ -31,7 +31,7 @@ func (s *Shorter) AddLink(link string) string {
 	return shortLink
 }
 
-func (s *Shorter) GetFullUrl(shortString string) (string, bool) {
+func (s *Shorter) GetFullURL(shortString string) (string, bool) {
 	value, exist := s.links[shortString]
 	if exist {
 		return value, exist
@@ -40,11 +40,11 @@ func (s *Shorter) GetFullUrl(shortString string) (string, bool) {
 }
 
 func getShortLink() string {
-	shortedUrl, err := generateRandomString(10)
+	shortedURL, err := generateRandomString(10)
 	if err != nil {
 		panic(err)
 	}
-	return shortedUrl
+	return shortedURL
 }
 
 func GetShorter() *Shorter {

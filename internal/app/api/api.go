@@ -17,7 +17,7 @@ func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
 	result, exist := s.shorter.GetFullURL(r.URL.Path[1:])
 	if exist {
 		w.Header().Add("Location", result)
-		w.WriteHeader(http.StatusTemporaryRedirect)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)
@@ -47,7 +47,10 @@ func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) RunApp() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.mainHandler)
-	http.ListenAndServe(`localhost:8080`, mux)
+	err := http.ListenAndServe(`:8080`, mux)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func GetNewServer() *Server {

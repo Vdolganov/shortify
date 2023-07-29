@@ -32,7 +32,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 	responseString := string(responseData)
 	shortLink := s.shorter.AddLink(responseString)
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf(`http://localhost/%s`, shortLink)))
+	w.Write([]byte(fmt.Sprintf(`http://%s/%s`, r.Host, shortLink)))
 }
 
 func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {

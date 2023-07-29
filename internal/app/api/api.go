@@ -17,7 +17,7 @@ func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
 	result, exist := s.shorter.GetFullURL(r.URL.Path[1:])
 	if exist {
 		w.Header().Add("Location", result)
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
 	w.WriteHeader(http.StatusBadRequest)
@@ -32,7 +32,7 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 	responseString := string(responseData)
 	shortLink := s.shorter.AddLink(responseString)
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf(`%s/%s`, r.Host, shortLink)))
+	w.Write([]byte(fmt.Sprintf(`http://%s/%s`, r.Host, shortLink)))
 }
 
 func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {

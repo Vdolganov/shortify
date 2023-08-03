@@ -113,9 +113,11 @@ func TestPostHandler(t *testing.T) {
 			if v.needCheckBody {
 				body, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
+				err = res.Body.Close()
+				require.NoError(t, err)
 				val := strings.SplitN(string(body), "/", 4)
-				shortLinkId := val[len(val)-1]
-				link := sh.Links[shortLinkId]
+				shortLinkID := val[len(val)-1]
+				link := sh.Links[shortLinkID]
 				assert.Equal(t, v.link, link)
 			}
 		})

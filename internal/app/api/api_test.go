@@ -61,6 +61,7 @@ func TestGetHandler(t *testing.T) {
 			r := httptest.NewRequest(http.MethodGet, v.path, nil)
 			server.getHandler(w, r)
 			res := w.Result()
+			res.Body.Close()
 			assert.Equal(t, v.want.statusCode, res.StatusCode)
 			assert.Equal(t, v.want.header, res.Header.Get("Location"))
 			assert.Equal(t, v.want.contentType, res.Header.Get("Content-Type"))

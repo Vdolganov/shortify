@@ -8,7 +8,7 @@ import (
 type shortedLinks map[string]string
 
 type Shorter struct {
-	links shortedLinks
+	Links shortedLinks
 }
 
 func generateRandomString(n int) (string, error) {
@@ -27,12 +27,12 @@ func generateRandomString(n int) (string, error) {
 
 func (s *Shorter) AddLink(link string) string {
 	shortLink := getShortLink()
-	s.links[shortLink] = link
+	s.Links[shortLink] = link
 	return shortLink
 }
 
 func (s *Shorter) GetFullURL(shortString string) (string, bool) {
-	value, exist := s.links[shortString]
+	value, exist := s.Links[shortString]
 	if exist {
 		return value, exist
 	}
@@ -49,5 +49,5 @@ func getShortLink() string {
 
 func GetShorter() *Shorter {
 	m := make(map[string]string)
-	return &Shorter{links: m}
+	return &Shorter{Links: m}
 }

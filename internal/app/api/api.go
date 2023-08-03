@@ -9,13 +9,13 @@ import (
 )
 
 type Server struct {
-	mux     http.ServeMux
-	shorter shorter.Shorter
+	Shorter shorter.Shorter
 }
 
 func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
-	result, exist := s.shorter.GetFullURL(r.URL.Path[1:])
+	result, exist := s.Shorter.GetFullURL(r.URL.Path[1:])
 	if exist {
+		w.Header().Add("Content-Type", "text/plain")
 		w.Header().Add("Location", result)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 		return
@@ -30,7 +30,8 @@ func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responseString := string(responseData)
-	shortLink := s.shorter.AddLink(responseString)
+	shortLink := s.Shorter.AddLink(responseString)
+	w.Header().Add("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(fmt.Sprintf(`http://%s/%s`, r.Host, shortLink)))
 }
@@ -55,7 +56,6 @@ func (s *Server) RunApp() {
 
 func GetNewServer() *Server {
 	return &Server{
-		mux:     *http.NewServeMux(),
-		shorter: *shorter.GetShorter(),
+		Shorter: *shorter.GetShorter(),
 	}
 }

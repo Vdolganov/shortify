@@ -3,12 +3,14 @@ package shorter
 import (
 	"crypto/rand"
 	"math/big"
+
+	"github.com/Vdolganov/shortify/internal/app/storage/links"
 )
 
 type shortedLinks map[string]string
 
 type Shorter struct {
-	Links shortedLinks
+	LinksStorage links.LinksStorage
 }
 
 func generateRandomString(n int) (string, error) {
@@ -27,12 +29,12 @@ func generateRandomString(n int) (string, error) {
 
 func (s *Shorter) AddLink(link string) string {
 	shortLink := getShortLink()
-	s.Links[shortLink] = link
+	s.LinksStorage.AddLink(shortLink, link)
 	return shortLink
 }
 
 func (s *Shorter) GetFullURL(shortString string) (string, bool) {
-	value, exist := s.Links[shortString]
+	value, exist := s.LinksStorage.GetLink(shortString)
 	if exist {
 		return value, exist
 	}
@@ -47,7 +49,8 @@ func getShortLink() string {
 	return shortedURL
 }
 
-func GetShorter() *Shorter {
-	m := make(map[string]string)
-	return &Shorter{Links: m}
+func GetShorter() Shorter {
+	return Shorter{
+		LinksStorage: links.GetLinksStorage(),
+	}
 }

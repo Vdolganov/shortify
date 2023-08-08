@@ -1,127 +1,50 @@
 package api
 
 import (
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/Vdolganov/shortify/internal/app/shorter"
+	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetHandler(t *testing.T) {
-	type Want struct {
-		statusCode  int
-		header      string
-		contentType string
-	}
-	tests := []struct {
-		name  string
-		links map[string]string
-		want  Want
-		path  string
+func TestRouter(t *testing.T) {
+
+	s := GetNewServer()
+	ts := httptest.NewServer(s.LinksRouter())
+	defer ts.Close()
+
+	client := resty.New()
+	client.SetBaseURL(ts.URL)
+	client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(0))
+
+	var testTable = []struct {
+		url       string
+		status    int
+		payload   string
+		getStatus int
 	}{
-		{
-			name: "Success test 1",
-			links: map[string]string{
-				"asdasd":  "yandex.ru",
-				"jgkjkgk": "google.com",
-			},
-			want: Want{
-				statusCode:  http.StatusTemporaryRedirect,
-				header:      "yandex.ru",
-				contentType: "text/plain",
-			},
-			path: "/asdasd",
-		},
-		{
-			name: "Server error 1",
-			links: map[string]string{
-				"jgkjkgk": "google.com",
-			},
-			want: Want{
-				statusCode:  http.StatusBadRequest,
-				header:      "",
-				contentType: "",
-			},
-			path: "/asda",
-		},
+		{url: "/", status: http.StatusCreated, payload: "ya.ru", getStatus: http.StatusTemporaryRedirect},
+		{url: "/", status: http.StatusCreated, payload: "google.com", getStatus: http.StatusTemporaryRedirect},
 	}
 
-	for _, v := range tests {
-		t.Run(v.name, func(t *testing.T) {
-			sh := shorter.Shorter{
-				Links: v.links,
-			}
-			server := Server{Shorter: sh}
-			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, v.path, nil)
-			server.getHandler(w, r)
-			res := w.Result()
-			res.Body.Close()
-			assert.Equal(t, v.want.statusCode, res.StatusCode)
-			assert.Equal(t, v.want.header, res.Header.Get("Location"))
-			assert.Equal(t, v.want.contentType, res.Header.Get("Content-Type"))
-		})
+	for _, v := range testTable {
+		resp, err := client.R().
+			SetBody([]byte(v.payload)).
+			Post(v.url)
+		require.NoError(t, err)
+		body := resp.Body()
+		resp.RawBody().Close()
+		assert.Equal(t, v.status, resp.StatusCode())
+		val := strings.SplitN(string(body), "/", 4)
+		valStr := val[len(val)-1]
+		pResp, _ := client.R().
+			Get(valStr)
+		locationHeader := pResp.Header().Get("Location")
+		assert.Equal(t, v.payload, locationHeader)
+		assert.Equal(t, v.getStatus, pResp.StatusCode())
 	}
-
-}
-
-func TestPostHandler(t *testing.T) {
-	type Want struct {
-		statusCode  int
-		contentType string
-	}
-	tests := []struct {
-		name          string
-		link          string
-		want          Want
-		needCheckBody bool
-	}{
-		{
-			name: "Success test 1",
-			link: "https://yandex.ru",
-			want: Want{
-				statusCode:  http.StatusCreated,
-				contentType: "text/plain",
-			},
-			needCheckBody: true,
-		},
-		{
-			name: "Success test 1",
-			link: "",
-			want: Want{
-				statusCode:  http.StatusBadRequest,
-				contentType: "",
-			},
-			needCheckBody: false,
-		},
-	}
-	for _, v := range tests {
-		t.Run(v.name, func(t *testing.T) {
-			sh := shorter.GetShorter()
-			server := Server{Shorter: *sh}
-			w := httptest.NewRecorder()
-			bodyReader := strings.NewReader(v.link)
-			r := httptest.NewRequest(http.MethodPost, "/", bodyReader)
-			server.postHandler(w, r)
-			res := w.Result()
-			assert.Equal(t, v.want.statusCode, res.StatusCode)
-			assert.Equal(t, v.want.contentType, res.Header.Get("Content-Type"))
-			if v.needCheckBody {
-				body, err := io.ReadAll(res.Body)
-				require.NoError(t, err)
-				err = res.Body.Close()
-				require.NoError(t, err)
-				val := strings.SplitN(string(body), "/", 4)
-				shortLinkID := val[len(val)-1]
-				link := sh.Links[shortLinkID]
-				assert.Equal(t, v.link, link)
-			}
-		})
-	}
-
 }

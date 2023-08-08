@@ -1,61 +1,30 @@
 package api
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 
-	"github.com/Vdolganov/shortify/internal/app/shorter"
+	gethandler "github.com/Vdolganov/shortify/internal/app/handlers/get_handler"
+	posthandler "github.com/Vdolganov/shortify/internal/app/handlers/post_handler"
+	"github.com/go-chi/chi/v5"
 )
 
-type Server struct {
-	Shorter shorter.Shorter
-}
+type Server struct{}
 
-func (s *Server) getHandler(w http.ResponseWriter, r *http.Request) {
-	result, exist := s.Shorter.GetFullURL(r.URL.Path[1:])
-	if exist {
-		w.Header().Add("Content-Type", "text/plain")
-		w.Header().Add("Location", result)
-		w.WriteHeader(http.StatusTemporaryRedirect)
-		return
-	}
-	w.WriteHeader(http.StatusBadRequest)
-}
+func (s *Server) LinksRouter() chi.Router {
+	r := chi.NewRouter()
 
-func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
-	responseData, err := io.ReadAll(r.Body)
-	if err != nil || len(responseData) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	responseString := string(responseData)
-	shortLink := s.Shorter.AddLink(responseString)
-	w.Header().Add("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf(`http://%s/%s`, r.Host, shortLink)))
-}
-
-func (s *Server) mainHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		s.getHandler(w, r)
-	}
-	if r.Method == http.MethodPost {
-		s.postHandler(w, r)
-	}
+	r.Get("/{linkId}", gethandler.GetHandler)
+	r.Post("/", posthandler.PostHandler)
+	return r
 }
 
 func (s *Server) RunApp() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", s.mainHandler)
-	err := http.ListenAndServe(`:8080`, mux)
+	err := http.ListenAndServe(`:8080`, s.LinksRouter())
 	if err != nil {
 		panic(err)
 	}
 }
 
 func GetNewServer() *Server {
-	return &Server{
-		Shorter: *shorter.GetShorter(),
-	}
+	return &Server{}
 }

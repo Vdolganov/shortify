@@ -10,8 +10,8 @@ import (
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	var shorterInstance = shorter.GetShorter()
 
-	linkId := chi.URLParam(r, "linkId")
-	result, exist := shorterInstance.GetFullURL(linkId)
+	linkID := chi.URLParam(r, "linkId")
+	result, exist := shorterInstance.GetFullURL(linkID)
 	if exist {
 		w.Header().Add("Content-Type", "text/plain")
 		w.Header().Add("Location", result)

@@ -9,28 +9,28 @@ import (
 )
 
 type Server struct {
-	Address   string
-	ShortBase string
+	ServerAddress string
+	BaseURL       string
 }
 
 func (s *Server) LinksRouter() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/{linkId}", gethandler.GetHandler)
-	r.Post("/", posthandler.PostHandler(s.ShortBase))
+	r.Post("/", posthandler.PostHandler(s.BaseURL))
 	return r
 }
 
 func (s *Server) RunApp() {
-	err := http.ListenAndServe(s.Address, s.LinksRouter())
+	err := http.ListenAndServe(s.ServerAddress, s.LinksRouter())
 	if err != nil {
 		panic(err)
 	}
 }
 
-func GetNewServer(address, shortBase string) *Server {
+func GetNewServer(ServerAddress, BaseURL string) *Server {
 	return &Server{
-		Address:   address,
-		ShortBase: shortBase,
+		ServerAddress,
+		BaseURL,
 	}
 }

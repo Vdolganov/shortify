@@ -7,6 +7,6 @@ import (
 
 func main() {
 	appConfig := config.InitConfig()
-	server := api.GetNewServer(appConfig.ServerAddress, appConfig.BaseUrl)
+	server := api.GetNewServer(appConfig.ServerAddress, appConfig.BaseURL)
 	server.RunApp()
 }

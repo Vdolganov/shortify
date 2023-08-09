@@ -13,7 +13,7 @@ import (
 
 func TestRouter(t *testing.T) {
 
-	s := GetNewServer()
+	s := GetNewServer(":8080", "localhost:8080")
 	ts := httptest.NewServer(s.LinksRouter())
 	defer ts.Close()
 

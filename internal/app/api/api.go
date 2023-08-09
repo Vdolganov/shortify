@@ -8,23 +8,29 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type Server struct{}
+type Server struct {
+	Address   string
+	ShortBase string
+}
 
 func (s *Server) LinksRouter() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/{linkId}", gethandler.GetHandler)
-	r.Post("/", posthandler.PostHandler)
+	r.Post("/", posthandler.PostHandler(s.ShortBase))
 	return r
 }
 
 func (s *Server) RunApp() {
-	err := http.ListenAndServe(`:8080`, s.LinksRouter())
+	err := http.ListenAndServe(s.Address, s.LinksRouter())
 	if err != nil {
 		panic(err)
 	}
 }
 
-func GetNewServer() *Server {
-	return &Server{}
+func GetNewServer(address, shortBase string) *Server {
+	return &Server{
+		Address:   address,
+		ShortBase: shortBase,
+	}
 }

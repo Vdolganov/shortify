@@ -20,6 +20,6 @@ func PostHandler(baseAddress string) http.HandlerFunc {
 		shortLink := shorterInstance.AddLink(responseString)
 		w.Header().Add("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(fmt.Sprintf(`%s/%s`, baseAddress, shortLink)))
+		w.Write([]byte(fmt.Sprintf(`http://%s/%s`, baseAddress, shortLink)))
 	}
 }

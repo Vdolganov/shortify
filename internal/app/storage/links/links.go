@@ -1,22 +1,24 @@
 package links
 
 type LinksStorage struct {
-	Links *map[string]string
+	links map[string]string
 }
 
-func (l *LinksStorage) AddLink(key, value string) {
-	(*l.Links)[key] = value
+func (l LinksStorage) AddLink(key, value string) {
+	l.links[key] = value
 }
 
-func (l *LinksStorage) GetLink(key string) (string, bool) {
-	v, ok := (*l.Links)[key]
+func (l LinksStorage) GetLink(key string) (string, bool) {
+	v, ok := l.links[key]
 	return v, ok
 }
 
 var linksData = make(map[string]string)
 
-func GetLinksStorage() LinksStorage {
-	return LinksStorage{
-		Links: &linksData,
+func NewLinksStorage() *LinksStorage {
+	return &LinksStorage{
+		links: linksData,
 	}
 }
+
+var LinksStorageInstance = NewLinksStorage()

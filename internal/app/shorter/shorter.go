@@ -7,10 +7,13 @@ import (
 	"github.com/Vdolganov/shortify/internal/app/storage/links"
 )
 
-type shortedLinks map[string]string
+type LinksStorage interface {
+	AddLink(key, val string)
+	GetLink(key string) (string, bool)
+}
 
 type Shorter struct {
-	LinksStorage links.LinksStorage
+	LinksStorage LinksStorage
 }
 
 func generateRandomString(n int) (string, error) {
@@ -27,10 +30,13 @@ func generateRandomString(n int) (string, error) {
 	return string(ret), nil
 }
 
-func (s *Shorter) AddLink(link string) string {
-	shortLink := getShortLink()
+func (s *Shorter) AddLink(link string) (string, error) {
+	shortLink, err := getShortLink()
+	if err != nil {
+		return "", err
+	}
 	s.LinksStorage.AddLink(shortLink, link)
-	return shortLink
+	return shortLink, nil
 }
 
 func (s *Shorter) GetFullURL(shortString string) (string, bool) {
@@ -41,16 +47,16 @@ func (s *Shorter) GetFullURL(shortString string) (string, bool) {
 	return "", exist
 }
 
-func getShortLink() string {
+func getShortLink() (string, error) {
 	shortedURL, err := generateRandomString(10)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return shortedURL
+	return shortedURL, nil
 }
 
-func GetShorter() Shorter {
+func NewShorter() Shorter {
 	return Shorter{
-		LinksStorage: links.GetLinksStorage(),
+		LinksStorage: links.LinksStorageInstance,
 	}
 }

@@ -13,7 +13,7 @@ import (
 
 func TestRouter(t *testing.T) {
 
-	s := GetNewServer(":8080", "localhost:8080")
+	s := NewServer(":8080", "localhost:8080")
 	ts := httptest.NewServer(s.LinksRouter())
 	defer ts.Close()
 
@@ -22,29 +22,32 @@ func TestRouter(t *testing.T) {
 	client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(0))
 
 	var testTable = []struct {
+		name      string
 		url       string
 		status    int
 		payload   string
 		getStatus int
 	}{
-		{url: "/", status: http.StatusCreated, payload: "ya.ru", getStatus: http.StatusTemporaryRedirect},
-		{url: "/", status: http.StatusCreated, payload: "google.com", getStatus: http.StatusTemporaryRedirect},
+		{name: "1 success test - ya.ru", url: "/", status: http.StatusCreated, payload: "ya.ru", getStatus: http.StatusTemporaryRedirect},
+		{name: "2 success test - google.com", url: "/", status: http.StatusCreated, payload: "google.com", getStatus: http.StatusTemporaryRedirect},
 	}
 
 	for _, v := range testTable {
-		resp, err := client.R().
-			SetBody([]byte(v.payload)).
-			Post(v.url)
-		require.NoError(t, err)
-		body := resp.Body()
-		resp.RawBody().Close()
-		assert.Equal(t, v.status, resp.StatusCode())
-		val := strings.SplitN(string(body), "/", 4)
-		valStr := val[len(val)-1]
-		pResp, _ := client.R().
-			Get(valStr)
-		locationHeader := pResp.Header().Get("Location")
-		assert.Equal(t, v.payload, locationHeader)
-		assert.Equal(t, v.getStatus, pResp.StatusCode())
+		t.Run("test name", func(t *testing.T) {
+			resp, err := client.R().
+				SetBody([]byte(v.payload)).
+				Post(v.url)
+			require.NoError(t, err)
+			body := resp.Body()
+			resp.RawBody().Close()
+			assert.Equal(t, v.status, resp.StatusCode())
+			val := strings.SplitN(string(body), "/", 4)
+			valStr := val[len(val)-1]
+			pResp, _ := client.R().
+				Get(valStr)
+			locationHeader := pResp.Header().Get("Location")
+			assert.Equal(t, v.payload, locationHeader)
+			assert.Equal(t, v.getStatus, pResp.StatusCode())
+		})
 	}
 }

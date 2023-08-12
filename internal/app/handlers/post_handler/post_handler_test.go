@@ -44,7 +44,7 @@ func TestPostHandler(t *testing.T) {
 	}
 	for _, v := range tests {
 		t.Run(v.name, func(t *testing.T) {
-			sh := shorter.GetShorter()
+			sh := shorter.NewShorter()
 			w := httptest.NewRecorder()
 			bodyReader := strings.NewReader(v.link)
 			r := httptest.NewRequest(http.MethodPost, "/", bodyReader)

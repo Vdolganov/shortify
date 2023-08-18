@@ -37,7 +37,7 @@ func (c *Config) parseEnv() {
 	}
 }
 
-func (c *Config) prepareBaseUrl() {
+func (c *Config) prepareBaseURL() {
 	if len(c.BaseURL) == 0 {
 		return
 	}
@@ -50,6 +50,6 @@ func New() Config {
 	c := Config{}
 	c.parseFlags()
 	c.parseEnv()
-	c.prepareBaseUrl()
+	c.prepareBaseURL()
 	return c
 }

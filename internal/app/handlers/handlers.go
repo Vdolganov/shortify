@@ -14,7 +14,7 @@ type Shorter interface {
 }
 
 type Handlers struct {
-	baseUrl string
+	baseURL string
 	shorter Shorter
 }
 
@@ -45,12 +45,12 @@ func (h *Handlers) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf(`%s/%s`, h.baseUrl, shortLink)))
+	w.Write([]byte(fmt.Sprintf(`%s/%s`, h.baseURL, shortLink)))
 }
 
-func New(baseUrl string, shorter Shorter) Handlers {
+func New(baseURL string, shorter Shorter) Handlers {
 	return Handlers{
-		baseUrl: baseUrl,
+		baseURL: baseURL,
 		shorter: shorter,
 	}
 }

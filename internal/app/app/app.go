@@ -24,7 +24,7 @@ type App struct {
 func (s *App) LinksRouter() chi.Router {
 	handlers := handlers.New(s.BaseURL, s.Shorter)
 	r := chi.NewRouter()
-	r.Use(loghttp.LogHttp)
+	r.Use(loghttp.LogHTTP)
 	r.Use(middleware.Recoverer)
 
 	r.Get("/{linkId}", handlers.Get)

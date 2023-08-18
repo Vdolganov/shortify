@@ -28,7 +28,7 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode
 }
 
-func LogHttp(h http.Handler) http.Handler {
+func LogHTTP(h http.Handler) http.Handler {
 	logFn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger, _ := zap.NewProduction()
 		sugar := logger.Sugar()

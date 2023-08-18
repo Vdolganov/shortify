@@ -2,6 +2,8 @@ package config
 
 import (
 	"flag"
+	"fmt"
+	"strings"
 
 	"github.com/caarlos0/env/v9"
 )
@@ -35,9 +37,19 @@ func (c *Config) parseEnv() {
 	}
 }
 
-func InitConfig() Config {
+func (c *Config) prepareBaseUrl() {
+	if len(c.BaseURL) == 0 {
+		return
+	}
+	if !strings.HasPrefix(c.BaseURL, "http") {
+		c.BaseURL = fmt.Sprintf(`http://%s`, c.BaseURL)
+	}
+}
+
+func New() Config {
 	c := Config{}
 	c.parseFlags()
 	c.parseEnv()
+	c.prepareBaseUrl()
 	return c
 }

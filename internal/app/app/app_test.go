@@ -1,4 +1,4 @@
-package api
+package app
 
 import (
 	"net/http"
@@ -6,14 +6,19 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Vdolganov/shortify/internal/app/shorter"
+	"github.com/Vdolganov/shortify/internal/app/storage/links"
+	"github.com/Vdolganov/shortify/internal/config"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRouter(t *testing.T) {
+	st := links.New()
+	sh := shorter.New(st)
 
-	s := NewServer(":8080", "localhost:8080")
+	s := New(config.Config{BaseURL: "localhost:8080", ServerAddress: ":8080"}, sh)
 	ts := httptest.NewServer(s.LinksRouter())
 	defer ts.Close()
 

@@ -63,8 +63,8 @@ func (h *Handlers) JsonPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	shortLink, err := h.shorter.AddLink(requestBody.URL)
-	shortLinkUrl := fmt.Sprintf(`%s/%s`, h.baseURL, shortLink)
-	b, err := json.Marshal(models.ShorterResponse{Result: shortLinkUrl})
+	shortLinkURL := fmt.Sprintf(`%s/%s`, h.baseURL, shortLink)
+	b, err := json.Marshal(models.ShorterResponse{Result: shortLinkURL})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

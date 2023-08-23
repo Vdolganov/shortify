@@ -3,8 +3,6 @@ package shorter
 import (
 	"crypto/rand"
 	"math/big"
-
-	"github.com/Vdolganov/shortify/internal/app/storage/links"
 )
 
 type LinksStorage interface {
@@ -55,8 +53,8 @@ func getShortLink() (string, error) {
 	return shortedURL, nil
 }
 
-func NewShorter() Shorter {
-	return Shorter{
-		LinksStorage: links.LinksStorageInstance,
+func New(storage LinksStorage) *Shorter {
+	return &Shorter{
+		LinksStorage: storage,
 	}
 }

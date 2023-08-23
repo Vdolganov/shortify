@@ -1,19 +1,27 @@
-package api
+package app
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/Vdolganov/shortify/internal/app/models"
+	"github.com/Vdolganov/shortify/internal/app/shorter"
+	"github.com/Vdolganov/shortify/internal/app/storage/links"
+	"github.com/Vdolganov/shortify/internal/config"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRouter(t *testing.T) {
+	st := links.New()
+	sh := shorter.New(st)
 
-	s := NewServer(":8080", "localhost:8080")
+	s := New(config.Config{BaseURL: "localhost:8080", ServerAddress: ":8080"}, sh)
 	ts := httptest.NewServer(s.LinksRouter())
 	defer ts.Close()
 
@@ -33,7 +41,7 @@ func TestRouter(t *testing.T) {
 	}
 
 	for _, v := range testTable {
-		t.Run("test name", func(t *testing.T) {
+		t.Run(v.name, func(t *testing.T) {
 			resp, err := client.R().
 				SetBody([]byte(v.payload)).
 				Post(v.url)
@@ -42,6 +50,30 @@ func TestRouter(t *testing.T) {
 			resp.RawBody().Close()
 			assert.Equal(t, v.status, resp.StatusCode())
 			val := strings.SplitN(string(body), "/", 4)
+			valStr := val[len(val)-1]
+			pResp, _ := client.R().
+				Get(valStr)
+			locationHeader := pResp.Header().Get("Location")
+			assert.Equal(t, v.payload, locationHeader)
+			assert.Equal(t, v.getStatus, pResp.StatusCode())
+		})
+	}
+
+	for _, v := range testTable {
+		t.Run(fmt.Sprintf(`json api: %s`, v.name), func(t *testing.T) {
+			bodyPayload := models.ShorterRequestBody{
+				URL: v.payload,
+			}
+			jsonBody, _ := json.Marshal(bodyPayload)
+
+			resp, err := client.R().
+				SetBody(jsonBody).
+				Post("/api/shorten")
+			require.NoError(t, err)
+			var respBody models.ShorterResponse
+			json.Unmarshal(resp.Body(), &respBody)
+			assert.Equal(t, v.status, resp.StatusCode())
+			val := strings.SplitN(respBody.Result, "/", 4)
 			valStr := val[len(val)-1]
 			pResp, _ := client.R().
 				Get(valStr)

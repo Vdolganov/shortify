@@ -15,10 +15,10 @@ func (l LinksStorage) GetLink(key string) (string, bool) {
 
 var linksData = make(map[string]string)
 
-func NewLinksStorage() *LinksStorage {
+func New() *LinksStorage {
 	return &LinksStorage{
 		links: linksData,
 	}
 }
 
-var LinksStorageInstance = NewLinksStorage()
+var LinksStorageInstance = New()

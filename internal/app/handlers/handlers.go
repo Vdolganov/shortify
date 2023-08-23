@@ -50,7 +50,7 @@ func (h *Handlers) Post(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(`%s/%s`, h.baseURL, shortLink)))
 }
 
-func (h *Handlers) JsonPost(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) JSONPost(w http.ResponseWriter, r *http.Request) {
 	var requestBody models.ShorterRequestBody
 	jsonDecoder := json.NewDecoder(r.Body)
 	err := jsonDecoder.Decode(&requestBody)

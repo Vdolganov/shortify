@@ -29,6 +29,7 @@ func (s *App) LinksRouter() chi.Router {
 
 	r.Get("/{linkId}", handlers.Get)
 	r.Post("/", handlers.Post)
+	r.Post("/api/shorten", handlers.JsonPost)
 	return r
 }
 
